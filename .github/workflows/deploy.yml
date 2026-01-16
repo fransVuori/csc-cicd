@@ -1,6 +1,9 @@
-name: Deploy HTML
+name: Deploy Docker App
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -8,13 +11,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
-      - name: Deploy
+
+      - name: Deploy to VPS
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: 195.148.23.182
+          USER: ubuntu
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H 195.148.23.182 >> ~/.ssh/known_hosts
-          scp -i ~/.ssh/deploy_key -r ./index.html ubuntu@195.148.23.182:/var/www/html/
+          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/deploy_key $USER@$HOST "mkdir -p ~/app"
+
+          scp -i ~/.ssh/deploy_key index.html docker-compose.yml $USER@$HOST:~/app/
+
+          ssh -i ~/.ssh/deploy_key $USER@$HOST "cd ~/app && docker compose up -d --force-recreate"

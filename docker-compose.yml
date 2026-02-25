@@ -1,6 +1,6 @@
 services:
   app:
-    build: .
+    image: fransvu/my-spring-app:latest
     ports:
       - "8080:8080"
     environment:

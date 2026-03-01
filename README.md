@@ -1,4 +1,4 @@
-YLEISKUVAUS JA ARKKITEHTUURI
+### 1. YLEISKUVAUS JA ARKKITEHTUURI
 
 Sovellus tarjoaa minimaalisen REST rajapinnan kirjojen (Book) luomiseen ja hakemiseen.
 
@@ -14,27 +14,38 @@ Infrastruktuuri: Docker, Docker Compose, GitHub Actions ja CSC cPouta pilvipalve
 
 Näillä ohjeilla saat projektin pyörimään omalle koneellesi välittömästi.
 
-ESIVAATIMUKSET:
-Koneellasi tulee olla asennettuna Git, Docker Desktop ja Java 21.
+### Esivaatimukset
+Koneellasi tulee olla asennettuna seuraavat työkalut:
+* **Git** (versionhallintaan)
+* **Docker Desktop** (konttien ajamiseen)
+* **Java 21** (paikalliseen koodaukseen)
 
-A. KLOONAA REPOSITORIO:
-git clone https://github.com/fransVuori/csc-cicd.git
+---
+
+### A. Kloonaa repositorio
+Lataa projekti omalle koneellesi ja siirry projektikansioon:
+```bash
+git clone [https://github.com/fransVuori/csc-cicd.git](https://github.com/fransVuori/csc-cicd.git)
 cd csc-cicd
+```
 
-B. KÄYNNISTÄ KEHITYSYMPÄRISTÖ:
+### B. KÄYNNISTÄ KEHITYSYMPÄRISTÖ:
 Paikallinen ympäristö käynnistää sekä Spring Boot sovelluksen että PostgreSQL
 tietokannan valmiiksi kytkettynä.
-
+```bash
 docker compose -f docker-compose.dev.yml up -d --build
+```
 
-C. TESTAA RAJAPINTAA:
-API vastaa nyt paikallisesti osoitteessa:
+### C. TESTAA RAJAPINTAA: 
+* **API vastaa nyt paikallisesti osoitteessa:**
 http://localhost:8080/api/books
 
 Voit kokeilla tietojen lisäämistä komentoriviltä PowerShellillä tai jollain API testaus työkalulla (esim. Postman):
+```bash
 Invoke-RestMethod -Uri http://localhost:8080/api/books -Method Post -Body '{"title":"Uusi kirja","author":"Kehittäjä"}' -ContentType "application/json"
+```
 
-D. SAMMUTA YMPÄRISTÖ:
+### D. SAMMUTA YMPÄRISTÖ: 
 docker compose -f docker-compose.dev.yml down
 
 ### 3. KONFIGURAATIOPROFIILIT (SPRING PROFILES)
@@ -43,17 +54,17 @@ Projektissa on käytössä kolme erillistä ympäristöprofiilia. Näin varmista
 että kehityksen, testauksen ja tuotannon tietokannat ja asetukset pysyvät
 tiukasti erillään.
 
-[ dev ] (application-dev.yml):
+* **`dev` (application-dev.yml):**
 Kehitysprofiili. Yhdistää Dockerin sisäiseen dev-db tietokantaan. Tämä aktivoituu
 automaattisesti docker-compose.dev.yml tiedostossa ympäristömuuttujalla
 SPRING_PROFILES_ACTIVE=dev. Hibernate luo ja päivittää tietokannan taulut
 automaattisesti lennosta.
 
-[ test ] (application-test.yml):
+* **`test` (application-test.yml):**
 Automaattisten testien profiili. Yhdistää paikallisen koneen porttiin 5433.
 Tietokanta luodaan tyhjästä ja tuhotaan jokaisen testiajon yhteydessä.
 
-[ prod ] (application-prod.yml):
+* **`prod` (application-prod.yml):**
 Tuotantoprofiili. Yhdistää tuotantopalvelimen db konttiin. Aktivoituu tuotannon
 docker-compose.yml tiedostossa. Tietokannan tunnukset ja salasanat luetaan
 turvallisesti GitHub Actionsin salaisuuksista (Secrets) ja injektoidaan
@@ -68,15 +79,18 @@ oma paikallinen data ylikirjoittuu.
 
 Näin ajat testit paikallisesti:
 
-A. Käynnistä erillinen testitietokanta taustalle:
+### A. Käynnistä erillinen testitietokanta taustalle:
+```bash
 docker compose -f docker-compose.test.yml up -d
-
-B. Aja testit Mavenilla testiprofiilia käyttäen:
+```
+### B. Aja testit Mavenilla testiprofiilia käyttäen:
+```bash
 ./mvnw test "-Dspring.profiles.active=test"
-
-C. Sammuta testikanta, kun olet valmis:
+```
+### C. Sammuta testikanta, kun olet valmis:
+```bash
 docker compose -f docker-compose.test.yml down
-
+```
 ### 5. CI/CD PUTKI JA TUOTANTODEPLOY
 
 Projektissa on täysin automatisoitu julkaisuputki, joka on toteutettu

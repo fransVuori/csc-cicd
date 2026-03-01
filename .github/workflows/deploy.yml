@@ -57,6 +57,8 @@ jobs:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           HOST: 195.148.23.182
           USER: ubuntu
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/deploy_key
@@ -66,4 +68,4 @@ jobs:
           ssh -i ~/.ssh/deploy_key $USER@$HOST "mkdir -p ~/app"
           scp -i ~/.ssh/deploy_key docker-compose.yml $USER@$HOST:~/app/
 
-          ssh -i ~/.ssh/deploy_key $USER@$HOST "cd ~/app && export DB_USER=tuotanto_kayttaja && export DB_PASSWORD=vahva_salasana_123 && docker compose pull && docker compose up -d --force-recreate"
+          ssh -i ~/.ssh/deploy_key $USER@$HOST "cd ~/app && export DB_USER=$DB_USER && export DB_PASSWORD=$DB_PASSWORD && docker compose pull && docker compose up -d --force-recreate"

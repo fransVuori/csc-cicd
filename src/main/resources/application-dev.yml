@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/devdb
+    url: jdbc:postgresql://dev-db:5432/devdb
     username: devuser
     password: devpassword
   jpa:

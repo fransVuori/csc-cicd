@@ -1,4 +1,15 @@
 services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_USER=devuser
+      - DB_PASSWORD=devpassword
+    depends_on:
+      - dev-db
+
   dev-db:
     image: postgres:15
     environment:
@@ -7,12 +18,3 @@ services:
       POSTGRES_PASSWORD: devpassword
     ports:
       - "5432:5432"
-
-  test-db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: testdb
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: testpassword
-    ports:
-      - "5433:5432"

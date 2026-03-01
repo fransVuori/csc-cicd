@@ -25,7 +25,7 @@ Koneellasi tulee olla asennettuna seuraavat työkalut:
 ### A. Kloonaa repositorio
 Lataa projekti omalle koneellesi ja siirry projektikansioon:
 ```bash
-git clone [https://github.com/fransVuori/csc-cicd.git](https://github.com/fransVuori/csc-cicd.git)
+git clone https://github.com/fransVuori/csc-cicd.git
 cd csc-cicd
 ```
 

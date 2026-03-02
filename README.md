@@ -114,21 +114,16 @@ docker compose -f docker-compose.test.yml down
 ### 5. CI/CD PUTKI JA TUOTANTODEPLOY
 
 Projektissa on täysin automatisoitu julkaisuputki, joka on toteutettu
-GitHub Actionsilla (deploy.yml).
+GitHub Actionsilla (deploy.yml). Projektin versionhallinnassa on käytössä alan standardien mukainen Branch Protection suojaus, mikä estää suorat päivitykset päähaaraan.
 
-PUTKEN TOIMINTALOGIIKKA:
+PUTKEN TOIMINTALOGIIKKA JA TYÖNKULKU:
 
-Koodin uusi versio pusketaan main haaraan.
-
-Putki luo tilapäisen tietokannan ja ajaa automaattiset testit.
-
-Kun testit menevät läpi, sovelluksesta rakennetaan uusi Docker image.
-
-Image julkaistaan Docker Hub container registryyn.
-
-Putki ottaa suojatun SSH yhteyden CSC cPouta virtuaalikoneelle, siirtää sinne
-tuotannon docker-compose.yml tiedoston, lataa uusimman imagen ja käynnistää
-palvelun päivitetyllä versiolla.
+* **Sivuhaara:** Uusi ominaisuus tai korjaus koodataan erillisessä sivuhaarassa (branch).
+* **Pull Request:** Kun koodi on valmis, kehittäjä avaa yhdistämispyynnön (Pull Request) main haaraan.
+* **Laadunvarmistus:** GitHub Actions reagoi yhdistämispyyntöön välittömästi. Se luo tilapäisen tietokannan ja ajaa automaattiset testit koodin toimivuuden varmistamiseksi ennen yhdistämistä.
+* **Yhdistäminen:** Vasta kun automaatio näyttää vihreää valoa ja testit on läpäisty, koodi voidaan yhdistää lopullisesti main haaraan.
+* **Rakentaminen:** Yhdistämisen jälkeen putki käynnistyy uudelleen, rakentaa sovelluksesta uuden Docker imagen ja julkaisee sen Docker Hub container registryyn.
+* **Julkaisu tuotantoon:** Lopuksi putki ottaa suojatun SSH yhteyden CSC cPouta virtuaalikoneelle, siirtää sinne tuotannon docker-compose.yml tiedoston, lataa uusimman imagen ja käynnistää palvelun päivitetyllä versiolla.
 
 ### 6. TUOTANTOYMPÄRISTÖ (CSC CPOUTA)
 
@@ -139,7 +134,7 @@ http://195.148.23.182:8080/api/books
 
 ### Rajapinnan testaaminen tuotannossa (PowerShell):
 
-Tällä komennolla voit lisätä uuden kirjan tuotantokantaan suoraan omalta koneeltasi. Komento on muotoiltu tukemaan myös skandinaavisia erikoismerkkejä.
+Tällä komennolla voit lisätä uuden kirjan tuotantokantaan suoraan omalta koneeltasi. Komento on muotoiltu tukemaan myös skandinaavisia erikoismerkkejä (ö,ä,å...).
 
 ```bash
 $body = @{
@@ -150,7 +145,7 @@ $body = @{
 Invoke-RestMethod -Uri http://195.148.23.182:8080/api/books -Method Post -Body ([System.Text.Encoding]::UTF8.GetBytes($body)) -ContentType "application/json; charset=utf-8"
 ```
 
-## Sovelluslogiikka ja testausstrategia
+### 7. Sovelluslogiikka ja testausstrategia
 
 Tämä luku syventyy sovelluksen sisäiseen ohjelmointimalliin sekä siihen, miten automaattinen laadunvarmistus on toteutettu Spring-kehyksen sisällä.
 

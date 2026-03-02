@@ -2,13 +2,19 @@
 
 Sovellus tarjoaa minimaalisen REST rajapinnan kirjojen (Book) luomiseen ja hakemiseen.
 
-Backend: Java 21 ja Spring Boot
+* Backend: Java 21 ja Spring Boot
+* Tietokanta: PostgreSQL
+* ORM: Spring Data JPA
+* Infrastruktuuri: Docker, Docker Compose, GitHub Actions ja CSC cPouta pilvipalvelu
 
-Tietokanta: PostgreSQL
+Tämän projektin pääasiallinen tarkoitus on demonstroida modernia ohjelmistotuotantoa, saumatonta automaatiota ja CI/CD toimintaa oikeassa pilviympäristössä. Tästä syystä itse ohjelman liiketoimintalogiikka on pidetty tarkoituksella erittäin kevyenä ja selkeänä, jotta huomio kiinnittyy infrastruktuurin ja julkaisuputken arkkitehtuuriin.
 
-ORM: Spring Data JPA
 
-Infrastruktuuri: Docker, Docker Compose, GitHub Actions ja CSC cPouta pilvipalvelu
+Itse ohjelman sisäinen toiminta on jaettu kolmeen selkeään komponenttiin:
+
+* **Tietomalli:** Järjestelmän pohjana toimii Book luokka. Se on määritelty entiteetiksi, joka vastaa suoraan tietokannan taulua. Jokaisella kirjalla on automaattisesti generoituva id tunnus, otsikko ja kirjailija.
+* **Tietokantakerros:** BookRepository rajapinta hoitaa kaiken kommunikaation tietokannan kanssa. Koska se laajentaa JpaRepository luokkaa, sovellus osaa automaattisesti tallentaa ja etsiä tietoa ilman ainuttakaan manuaalisesti kirjoitettua SQL komentoa.
+* **Rajapinta:** BookController luokka tarjoaa päätepisteet ulkomaailmalle osoitteessa /api/books. Se ottaa vastaan GET pyyntöjä kirjojen listaamiseksi ja POST pyyntöjä uusien kirjojen luomiseksi. Kontrolleri delegoi näiden pyyntöjen käsittelyn suoraan repositoryn vastuulle.
 
 ### 2. PAIKALLINEN KEHITYS (LOCAL DEVELOPMENT)
 
@@ -40,13 +46,15 @@ docker compose -f docker-compose.dev.yml up -d --build
 * **API vastaa nyt paikallisesti osoitteessa:**
 http://localhost:8080/api/books
 
-Voit kokeilla tietojen lisäämistä komentoriviltä PowerShellillä tai jollain API testaus työkalulla (esim. Postman):
+Voit kokeilla tietojen lisäämistä komentoriviltä **PowerShellillä** tai jollain API testaus työkalulla (esim. Postman):
 ```bash
 Invoke-RestMethod -Uri http://localhost:8080/api/books -Method Post -Body '{"title":"Uusi kirja","author":"Kehittäjä"}' -ContentType "application/json"
 ```
 
 ### D. SAMMUTA YMPÄRISTÖ: 
+```bash
 docker compose -f docker-compose.dev.yml down
+```
 
 ### 3. KONFIGURAATIOPROFIILIT (SPRING PROFILES)
 
@@ -72,10 +80,22 @@ ympäristömuuttujina julkaisuputken kautta.
 
 ### 4. TESTAUS JA TESTIPROFIILI
 
-Automaattiset testit ajetaan aina erillistä testitietokantaa vasten. Erillinen
-testiprofiili on ohjelmistotuotannossa kriittisen tärkeä: sen ansiosta testiajo
-voi vapaasti luoda ja poistaa testidataa ilman vaaraa siitä, että kehittäjän
-oma paikallinen data ylikirjoittuu.
+Automaattiset testit ajetaan aina erillistä testitietokantaa vasten. Erillinen testiprofiili on ohjelmistotuotannossa kriittisen tärkeä: sen ansiosta testiajo voi vapaasti luoda ja poistaa testidataa ilman vaaraa siitä, että kehittäjän oma paikallinen data ylikirjoittuu.
+
+### Miten testaus toimii tässä projektissa
+
+Projektin testaus on toteutettu Spring kehyksen sisäänrakennetuilla työkaluilla. Pääasiallinen testiluokka on BookControllerTest, joka varmistaa rajapinnan toiminnan päästä päähän.
+
+* **Kontekstin lataus:** Annotaatio `@SpringBootTest` käynnistää sovelluksen taustajärjestelmän testiajoa varten.
+* **Oikea ympäristö:** Annotaatio `@ActiveProfiles("test")` pakottaa sovelluksen käyttämään testiprofiilin asetuksia ja yhdistämään paikalliseen testikantaan.
+* **Rajapinnan simulointi:** Työkalu nimeltä `MockMvc` mahdollistaa HTTP pyyntöjen simuloinnin ohjelmallisesti.
+
+### Nykyisen testin kulku
+
+Testimetodi `shouldCreateAndReturnBook` suorittaa kaksi tärkeää vaihetta peräkkäin:
+
+1. Se lähettää POST pyynnön ja JSON muotoisen kirjan datan rajapintaan. Testi tarkistaa heti perään, että palvelin vastaa tilakoodilla 200 OK ja palauttaa juuri luodun kirjan tiedot oikein.
+2. Tämän jälkeen se lähettää GET pyynnön hakeakseen kaikki kirjat ja varmistaa, että äsken lisätty kirja löytyy listan ensimmäisenä.
 
 Näin ajat testit paikallisesti:
 

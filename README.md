@@ -137,6 +137,18 @@ Rajapinta on julkisesti saatavilla osoitteessa:
 
 http://195.148.23.182:8080/api/books
 
+### Rajapinnan testaaminen tuotannossa (PowerShell):
+
+Tällä komennolla voit lisätä uuden kirjan tuotantokantaan suoraan omalta koneeltasi. Komento on muotoiltu tukemaan myös skandinaavisia erikoismerkkejä.
+
+```bash
+$body = @{
+    title = "Nimi"
+    author = "Tekijä"
+} | ConvertTo-Json -Compress
+
+Invoke-RestMethod -Uri http://195.148.23.182:8080/api/books -Method Post -Body ([System.Text.Encoding]::UTF8.GetBytes($body)) -ContentType "application/json; charset=utf-8"
+```
 
 ## Sovelluslogiikka ja testausstrategia
 

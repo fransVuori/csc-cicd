@@ -118,12 +118,16 @@ GitHub Actionsilla (deploy.yml). Projektin versionhallinnassa on käytössä ala
 
 PUTKEN TOIMINTALOGIIKKA JA TYÖNKULKU:
 
-* **Sivuhaara:** Uusi ominaisuus tai korjaus koodataan erillisessä sivuhaarassa (branch).
-* **Pull Request:** Kun koodi on valmis, kehittäjä avaa yhdistämispyynnön (Pull Request) main haaraan.
-* **Laadunvarmistus:** GitHub Actions reagoi yhdistämispyyntöön välittömästi. Se luo tilapäisen tietokannan ja ajaa automaattiset testit koodin toimivuuden varmistamiseksi ennen yhdistämistä.
-* **Yhdistäminen:** Vasta kun automaatio näyttää vihreää valoa ja testit on läpäisty, koodi voidaan yhdistää lopullisesti main haaraan.
-* **Rakentaminen:** Yhdistämisen jälkeen putki käynnistyy uudelleen, rakentaa sovelluksesta uuden Docker imagen ja julkaisee sen Docker Hub container registryyn.
-* **Julkaisu tuotantoon:** Lopuksi putki ottaa suojatun SSH yhteyden CSC cPouta virtuaalikoneelle, siirtää sinne tuotannon docker-compose.yml tiedoston, lataa uusimman imagen ja käynnistää palvelun päivitetyllä versiolla.
+A. Jatkuva integraatio (Pull Request)
+* **Sivuhaara:** Uusi ominaisuus tai korjaus koodataan erillisessä sivuhaarassa.
+* **Yhdistämispyyntö:** Kun koodi on valmis, kehittäjä avaa yhdistämispyynnön (Pull Request) main haaraan.
+* **Laadunvarmistus:** GitHub Actions reagoi pyyntöön välittömästi. Se ajaa automaattiset testit koodin toimivuuden varmistamiseksi. Tässä vaiheessa putki on ohjeistettu ohittamaan Docker imagen julkaisu tuotantopalvelimelle.
+
+B. Jatkuva julkaisu (Merge to main)
+* **Yhdistäminen:** Vasta kun automaatio näyttää vihreää valoa, koodi voidaan yhdistää lopullisesti main haaraan.
+* **Tuotantoversio:** Yhdistämisen jälkeen putki käynnistyy uudelleen. Koska tapahtuman tyyppi on nyt uuden koodin vastaanottaminen, putki suorittaa ehtolauseiden (if: github.event_name == 'push') ansiosta myös julkaisuvaiheet.
+* **Rakentaminen:** Sovelluksesta rakennetaan uusi Docker image, joka viedään Docker Hubiin.
+* **Julkaisu:** Lopuksi putki ottaa suojatun SSH yhteyden CSC cPouta virtuaalikoneelle, lataa uusimman imagen ja käynnistää tuotannon päivitetyllä versiolla.
 
 ### 6. TUOTANTOYMPÄRISTÖ (CSC CPOUTA)
 
